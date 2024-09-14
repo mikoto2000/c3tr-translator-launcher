@@ -1,51 +1,83 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+
+import { open } from '@tauri-apps/plugin-dialog';
+
 import "./App.css";
+import { Button, CssBaseline, TextField, Typography } from "@mui/material";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const SERVER_ARGS_DEFAULT = "--log-disable -ngl 43";
+  const CLIENT_ARGS_DEFAULT = "";
+
+  const [llamaServerPath, setLlamaServerPath] = useState<string>("llama-server");
+  const [llamaServerArgs, setLlamaServerArgs] = useState<string>(SERVER_ARGS_DEFAULT);
+  const [llamaClientPath, setLlamaClientPath] = useState<string>("c3tr-client");
+  const [llamaClientArgs, setLlamaClientArgs] = useState<string>(CLIENT_ARGS_DEFAULT);
 
   return (
     <div className="container">
-      <h1>Welcome to Tauri!</h1>
+      <CssBaseline />
 
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <Typography>Server:</Typography>
+      <div>
+        <TextField
+          placeholder="llama server path"
+          value={llamaServerPath}
+          fullWidth
+        />
+        <TextField
+          placeholder="server argument"
+          value={llamaServerArgs}
+          fullWidth
+        />
+        <Button
+          onClick={async () => {
+            const filePath = await open({});
+            if (filePath) {
+              setLlamaServerPath(filePath);
+            }
+          }}
+        >
+          ファイル選択
+        </Button>
+        <Button
+          onClick={async () => {
+          }}
+        >
+          実行
+        </Button>
       </div>
 
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+      <Typography>Client:</Typography>
+      <div>
+        <TextField
+          placeholder="llama client path"
+          value={llamaClientPath}
+          fullWidth
         />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p>{greetMsg}</p>
+        <TextField
+          placeholder="server argument"
+          value={llamaClientArgs}
+          fullWidth
+        />
+        <Button
+          onClick={async () => {
+            const filePath = await open({});
+            if (filePath) {
+              setLlamaClientPath(filePath);
+            }
+          }}
+        >
+          ファイル選択
+        </Button>
+        <Button
+          onClick={async () => {
+          }}
+        >
+          実行
+        </Button>
+      </div>
     </div>
   );
 }
