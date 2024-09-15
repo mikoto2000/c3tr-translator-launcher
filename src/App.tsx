@@ -4,6 +4,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 import "./App.css";
 import { Button, CssBaseline, TextField, Typography } from "@mui/material";
+import { invoke } from "@tauri-apps/api/core";
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
 
   const [llamaServerPath, setLlamaServerPath] = useState<string>("llama-server");
   const [llamaServerArgs, setLlamaServerArgs] = useState<string>(SERVER_ARGS_DEFAULT);
+  const [llamaServerModelPath, setLlamaServerModelPath] = useState<string>("");
   const [llamaClientPath, setLlamaClientPath] = useState<string>("c3tr-client");
   const [llamaClientArgs, setLlamaClientArgs] = useState<string>(CLIENT_ARGS_DEFAULT);
 
@@ -23,12 +25,11 @@ function App() {
       <div>
         <TextField
           placeholder="llama server path"
+          onChange={(event) => {
+            const newValue = event.currentTarget.value;
+            setLlamaServerPath(newValue);
+          }}
           value={llamaServerPath}
-          fullWidth
-        />
-        <TextField
-          placeholder="server argument"
-          value={llamaServerArgs}
           fullWidth
         />
         <Button
@@ -38,11 +39,42 @@ function App() {
               setLlamaServerPath(filePath);
             }
           }}
+          fullWidth
         >
-          ファイル選択
+          サーバー実行ファイル選択
         </Button>
+        <TextField
+          placeholder="model"
+          onChange={(event) => {
+            const newValue = event.currentTarget.value;
+            setLlamaServerModelPath(newValue);
+          }}
+          value={llamaServerModelPath}
+          fullWidth
+        />
         <Button
           onClick={async () => {
+            const filePath = await open({});
+            if (filePath) {
+              setLlamaServerModelPath(filePath);
+            }
+          }}
+          fullWidth
+        >
+          モデルファイル選択
+        </Button>
+        <TextField
+          placeholder="server argument"
+          onChange={(event) => {
+            const newValue = event.currentTarget.value;
+            setLlamaServerArgs(newValue);
+          }}
+          value={llamaServerArgs}
+          fullWidth
+        />
+        <Button
+          onClick={async () => {
+            await invoke("external_command", { cmd: llamaServerPath, args: "-m " + llamaServerModelPath + " " + llamaServerArgs});
           }}
         >
           実行
@@ -53,11 +85,19 @@ function App() {
       <div>
         <TextField
           placeholder="llama client path"
+          onChange={(event) => {
+            const newValue = event.currentTarget.value;
+            setLlamaClientPath(newValue);
+          }}
           value={llamaClientPath}
           fullWidth
         />
         <TextField
-          placeholder="server argument"
+          placeholder="client argument"
+          onChange={(event) => {
+            const newValue = event.currentTarget.value;
+            setLlamaClientArgs(newValue);
+          }}
           value={llamaClientArgs}
           fullWidth
         />
@@ -73,6 +113,7 @@ function App() {
         </Button>
         <Button
           onClick={async () => {
+            await invoke("external_command", { cmd: llamaClientPath, args: llamaClientArgs});
           }}
         >
           実行
