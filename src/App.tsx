@@ -109,7 +109,12 @@ function App() {
         />
         <Button
           onClick={async () => {
-            await invoke("external_command", { cmd: llamaServerPath, args: "-m " + llamaServerModelPath + " " + llamaServerArgs });
+            await invoke(
+              "external_command",
+              {
+                cmd: llamaServerPath,
+                args: "-m " + llamaServerModelPath + " " + llamaServerArgs
+              });
           }}
         >
           実行
@@ -151,7 +156,9 @@ function App() {
         />
         <Button
           onClick={async () => {
-            await invoke("external_command", { cmd: llamaClientPath, args: llamaClientArgs });
+            await invoke(
+              "external_command_no_exit",
+              { cmd: llamaClientPath, args: llamaClientArgs });
           }}
         >
           実行
