@@ -16,3 +16,22 @@ npm add @tauri-apps/plugin-dialog
 cargo add tauri-plugin-fs
 npm add @tauri-apps/plugin-fs
 ```
+
+入力記憶用に Store プラグインを追加。
+
+```sh
+cargo add tauri-plugin-store
+npm add @tauri-apps/plugin-store
+```
+
+ファイルダウンロード用にクレートを追加
+
+```sh
+cargo add reqwest
+```
+
+GitHub API 操作用にクレートを追加
+
+```sh
+cargo add octocrab
+```

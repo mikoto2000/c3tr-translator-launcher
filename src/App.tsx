@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Store } from '@tauri-apps/plugin-store'
-import { open } from '@tauri-apps/plugin-dialog';
+import { open, save } from '@tauri-apps/plugin-dialog';
 
 import "./App.css";
 import { Button, CssBaseline, TextField, Typography } from "@mui/material";
@@ -143,7 +143,20 @@ function App() {
           }}
           fullWidth
         >
-          ファイル選択
+          クライアントファイル選択
+        </Button>
+        <Button
+          onClick={async () => {
+            const dirPath = await open({directory: true});
+            if (dirPath) {
+              setLlamaClientPath(dirPath);
+              const installPath = invoke("download_c3tr_client", {installDir: dirPath});
+              config.set('llamaClientPath', installPath);
+            }
+          }}
+          fullWidth
+        >
+          クライアントファイルダウンロード
         </Button>
         <TextField
           placeholder="client argument"
