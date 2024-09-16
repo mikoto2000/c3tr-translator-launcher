@@ -35,3 +35,9 @@ GitHub API 操作用にクレートを追加
 ```sh
 cargo add octocrab
 ```
+
+zip を扱うためにクレートを追加
+
+```sh
+
+```

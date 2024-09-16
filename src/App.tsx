@@ -149,9 +149,10 @@ function App() {
           onClick={async () => {
             const dirPath = await open({directory: true});
             if (dirPath) {
-              setLlamaClientPath(dirPath);
-              const installPath = invoke("download_c3tr_client", {installDir: dirPath});
+              const installPath: string = await invoke("download_c3tr_client", {installDir: dirPath});
+              console.log(installPath);
               config.set('llamaClientPath', installPath);
+              setLlamaClientPath(installPath);
             }
           }}
           fullWidth
@@ -170,7 +171,7 @@ function App() {
         <Button
           onClick={async () => {
             await invoke(
-              "external_command_no_exit",
+              "external_command",
               { cmd: llamaClientPath, args: llamaClientArgs });
           }}
         >
