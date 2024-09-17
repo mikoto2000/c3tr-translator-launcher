@@ -52,10 +52,12 @@ function App() {
     <div className="container">
       <CssBaseline />
 
-      <Typography>Server:</Typography>
+      <Typography align="left">ランチャー:</Typography>
+
+      <Typography align="left">Server:</Typography>
       <div>
         <TextField
-          placeholder="llama server path"
+          label="llama server path"
           onChange={(event) => {
             const newValue = event.currentTarget.value;
             setLlamaServerPath(newValue);
@@ -77,7 +79,7 @@ function App() {
           サーバー実行ファイル選択
         </Button>
         <TextField
-          placeholder="model"
+          label="model"
           onChange={(event) => {
             const newValue = event.currentTarget.value;
             setLlamaServerModelPath(newValue);
@@ -98,43 +100,8 @@ function App() {
         >
           モデルファイル選択
         </Button>
-        {/* TODO: コンポーネントに分離・ダウンロード中がわかる状態を持たせる */}
-        <FormControl fullWidth>
-          <InputLabel>ダウンロードモデル選択</InputLabel>
-          <Select
-            value={downloadModelName}
-            onChange={(event) => {
-              const newValue = event.target.value;
-              if (newValue) {
-                setDownloadModelName(newValue);
-              }
-            }}
-          >
-            <MenuItem value="C3TR-Adapter-IQ3_XXS.gguf">C3TR-Adapter-IQ3_XXS.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter-Q3_k_m.gguf">C3TR-Adapter-Q3_k_m.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter-Q4_k_m.gguf">C3TR-Adapter-Q4_k_m.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter.f16.Q4_k_m.gguf">C3TR-Adapter.f16.Q4_k_m.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter.f16.Q5_k_m.gguf">C3TR-Adapter.f16.Q5_k_m.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter.f16.Q6_k.gguf">C3TR-Adapter.f16.Q6_k.gguf</MenuItem>
-            <MenuItem value="C3TR-Adapter.f16.Q8_0.gguf">C3TR-Adapter.f16.Q8_0.gguf</MenuItem>
-          </Select>
-        </FormControl>
-        <Button
-          onClick={async () => {
-            const dirPath = await open({ directory: true });
-            if (dirPath) {
-              const installPath: string = await invoke("download_c3tr_model", { installDir: dirPath, installModel: downloadModelName });
-              console.log(installPath);
-              config.set('llamaClientPath', installPath);
-              setLlamaServerModelPath(installPath);
-            }
-          }}
-          fullWidth
-        >
-          モデルファイルダウンロード
-        </Button>
         <TextField
-          placeholder="server argument"
+          label="server argument"
           onChange={(event) => {
             const newValue = event.currentTarget.value;
             setLlamaServerArgs(newValue);
@@ -157,10 +124,10 @@ function App() {
         </Button>
       </div>
 
-      <Typography>Client:</Typography>
+      <Typography align="left">Client:</Typography>
       <div>
         <TextField
-          placeholder="llama client path"
+          label="llama client path"
           onChange={(event) => {
             const newValue = event.currentTarget.value;
             setLlamaClientPath(newValue);
@@ -181,20 +148,6 @@ function App() {
         >
           クライアントファイル選択
         </Button>
-        <Button
-          onClick={async () => {
-            const dirPath = await open({ directory: true });
-            if (dirPath) {
-              const installPath: string = await invoke("download_c3tr_client", { installDir: dirPath });
-              console.log(installPath);
-              config.set('llamaClientPath', installPath);
-              setLlamaClientPath(installPath);
-            }
-          }}
-          fullWidth
-        >
-          クライアントファイルダウンロード
-        </Button>
         <TextField
           placeholder="client argument"
           onChange={(event) => {
@@ -214,6 +167,56 @@ function App() {
           実行
         </Button>
       </div>
+      <Typography align="left">ダウンローダー:</Typography>
+      {/* TODO: コンポーネントに分離・ダウンロード中がわかる状態を持たせる */}
+      <FormControl fullWidth>
+        <InputLabel>ダウンロードモデル選択</InputLabel>
+        <Select
+          value={downloadModelName}
+          onChange={(event) => {
+            const newValue = event.target.value;
+            if (newValue) {
+              setDownloadModelName(newValue);
+            }
+          }}
+        >
+          <MenuItem value="C3TR-Adapter-IQ3_XXS.gguf">C3TR-Adapter-IQ3_XXS.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter-Q3_k_m.gguf">C3TR-Adapter-Q3_k_m.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter-Q4_k_m.gguf">C3TR-Adapter-Q4_k_m.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter.f16.Q4_k_m.gguf">C3TR-Adapter.f16.Q4_k_m.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter.f16.Q5_k_m.gguf">C3TR-Adapter.f16.Q5_k_m.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter.f16.Q6_k.gguf">C3TR-Adapter.f16.Q6_k.gguf</MenuItem>
+          <MenuItem value="C3TR-Adapter.f16.Q8_0.gguf">C3TR-Adapter.f16.Q8_0.gguf</MenuItem>
+        </Select>
+      </FormControl>
+      <Button
+        onClick={async () => {
+          const dirPath = await open({ directory: true });
+          if (dirPath) {
+            const installPath: string = await invoke("download_c3tr_model", { installDir: dirPath, installModel: downloadModelName });
+            console.log(installPath);
+            config.set('llamaClientPath', installPath);
+            setLlamaServerModelPath(installPath);
+          }
+        }}
+        fullWidth
+      >
+        モデルファイルダウンロード
+      </Button>
+      <Button
+        onClick={async () => {
+          const dirPath = await open({ directory: true });
+          if (dirPath) {
+            const installPath: string = await invoke("download_c3tr_client", { installDir: dirPath });
+            console.log(installPath);
+            config.set('llamaClientPath', installPath);
+            setLlamaClientPath(installPath);
+          }
+        }}
+        fullWidth
+      >
+        クライアントファイルダウンロード
+      </Button>
     </div>
   );
 }
