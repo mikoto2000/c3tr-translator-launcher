@@ -8,6 +8,17 @@
     "shell:allow-open",
     "dialog:default",
     "fs:default",
-    "store:default"
+    "store:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "cmd.exe",
+          "cmd": "cmd.exe",
+          "args": ["/C", "start", "cmd.exe"],
+          "sidecar": false
+        }
+      ]
+    }
   ]
 }

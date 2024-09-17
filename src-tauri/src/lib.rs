@@ -28,6 +28,14 @@ fn external_command(cmd: String, args: String) {
 }
 
 #[tauri::command]
+async fn download_c3tr_model(install_dir: String, install_model: String) -> String {
+    let download_url = "https://huggingface.co/webbigdata/C3TR-Adapter_gguf/resolve/main/{{MODEL_NAME}}?download=true".replace("{{MODEL_NAME}}", &install_model);
+
+    // ファイルダウンロード
+    download_to(download_url, install_dir).await
+}
+
+#[tauri::command]
 async fn download_c3tr_client(install_dir: String) -> String {
     // 最新リリースを取得
     let octocrab = Octocrab::builder().build().unwrap();
@@ -77,7 +85,6 @@ async fn extract_file_from_zip(install_dir:String, zip_path: String, target_file
         println!("ファイル {} を {} に保存しました。", target_file_name, install_dir);
 
         let output_file_path_string = (*output_file_path.to_string_lossy()).to_string();
-        println!("{}", output_file_path_string);
         return output_file_path_string;
     } else {
         println!("ファイル {} が見つかりませんでした。", target_file_name);
@@ -89,6 +96,7 @@ async fn download_to(from: String, to: String) -> String {
     let response = get(&from).await.unwrap();
     let content = response.bytes().await.unwrap();
     let file_name = from.split("/").last().unwrap();
+    let file_name = file_name.split("?").next().unwrap();
     let mut out_file_path = PathBuf::from(&to);
     out_file_path.push(file_name);
     let mut out_file = File::create(&out_file_path).unwrap();
@@ -106,7 +114,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             external_command,
-            download_c3tr_client
+            download_c3tr_client,
+            download_c3tr_model
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
