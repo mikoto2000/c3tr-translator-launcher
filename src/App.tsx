@@ -168,6 +168,20 @@ function App() {
         </Button>
       </div>
       <Typography align="left">ダウンローダー:</Typography>
+      <Button
+        onClick={async () => {
+          const dirPath = await open({ directory: true });
+          if (dirPath) {
+            const installPath: string = await invoke("download_llama_cpp", { installDir: dirPath });
+            console.log(installPath);
+            config.set('llamaServerPath', installPath);
+            setLlamaServerPath(installPath);
+          }
+        }}
+        fullWidth
+      >
+        サーバーファイルダウンロード †選択したディレクトリにファイル一式が展開されます
+      </Button>
       {/* TODO: コンポーネントに分離・ダウンロード中がわかる状態を持たせる */}
       <FormControl fullWidth>
         <InputLabel>ダウンロードモデル選択</InputLabel>
@@ -195,7 +209,7 @@ function App() {
           if (dirPath) {
             const installPath: string = await invoke("download_c3tr_model", { installDir: dirPath, installModel: downloadModelName });
             console.log(installPath);
-            config.set('llamaClientPath', installPath);
+            config.set('llamaServerModelPath', installPath);
             setLlamaServerModelPath(installPath);
           }
         }}
