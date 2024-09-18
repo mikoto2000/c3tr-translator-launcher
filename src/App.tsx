@@ -4,7 +4,7 @@ import { Store } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog';
 
 import "./App.css";
-import { Button, CssBaseline, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Button, CssBaseline, TextField, Typography } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ModelDownloader } from "./downloader/ModelDownloader";
