@@ -8,6 +8,7 @@ import { Button, CssBaseline, FormControl, InputLabel, MenuItem, Select, TextFie
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ModelDownloader } from "./downloader/ModelDownloader";
+import { C3trClientDownloader } from "./downloader/C3trClientDownloader";
 
 function App() {
 
@@ -191,22 +192,11 @@ function App() {
         サーバーファイルダウンロード †選択したディレクトリにファイル一式が展開されます
       </Button>
       <ModelDownloader
-        setLlamaServerModelPath={setLlamaServerPath}
+        setLlamaServerModelPath={setLlamaServerModelPath}
       />
-      <Button
-        onClick={async () => {
-          const dirPath = await open({ directory: true });
-          if (dirPath) {
-            const installPath: string = await invoke("download_c3tr_client", { installDir: dirPath });
-            console.log(installPath);
-            config.set('llamaClientPath', installPath);
-            setLlamaClientPath(installPath);
-          }
-        }}
-        fullWidth
-      >
-        クライアントファイルダウンロード
-      </Button>
+      <C3trClientDownloader
+        setLlamaClientPath={setLlamaClientPath}
+      />
     </div>
   );
 }
