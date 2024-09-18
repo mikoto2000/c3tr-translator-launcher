@@ -109,7 +109,6 @@ async fn extract_file_from_zip(install_dir:String, zip_path: String, target_file
 async fn download_to(from: String, to: String) -> String {
     use tokio::io::AsyncWriteExt;
     use tokio::fs::File;
-    use tokio::io::AsyncReadExt;
     use futures_util::StreamExt;
 
     let client = Client::new();
