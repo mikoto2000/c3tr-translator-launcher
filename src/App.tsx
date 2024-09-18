@@ -22,6 +22,10 @@ function App() {
   const [llamaClientPath, setLlamaClientPath] = useState<string>("c3tr-client");
   const [llamaClientArgs, setLlamaClientArgs] = useState<string>(CLIENT_ARGS_DEFAULT);
 
+  {/* ダウンロードコンポーネントに分離したらそっちに移動 */}
+  const [downloadedSize, setDownloadedSize] = useState<number>(0);
+  const [totalSize, setTotalSize] = useState<number>(0);
+
   useEffect(() => {
 
     (async () => {
@@ -50,6 +54,8 @@ function App() {
         const current = (event.payload as any)[0];
         const total = (event.payload as any)[1];
         console.log(`${current}/${total}`);
+        setDownloadedSize(current);
+        setTotalSize(total);
       });
     })()
 
@@ -224,6 +230,7 @@ function App() {
       >
         モデルファイルダウンロード
       </Button>
+      モデルファイルダウンロード進捗: { `${downloadedSize} / ${totalSize}`}
       <Button
         onClick={async () => {
           const dirPath = await open({ directory: true });
