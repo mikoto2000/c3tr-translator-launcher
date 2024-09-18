@@ -1,3 +1,6 @@
+use tauri::AppHandle;
+use tauri::Emitter;
+
 use std::fs;
 use std::fs::File;
 use std::io::Read;
@@ -30,7 +33,7 @@ fn external_command(cmd: String, args: String) {
 }
 
 #[tauri::command]
-async fn download_llama_cpp(install_dir: String) -> String {
+async fn download_llama_cpp(app: AppHandle, install_dir: String) -> String {
     // latest の URL を組み立て
     // let latest_tag = get_latest_release_tag(String::from("ggerganov"), String::from("llama.cpp")).await;
     // 最新(b3772)で動かないので、暫定
@@ -39,8 +42,10 @@ async fn download_llama_cpp(install_dir: String) -> String {
     let latest_cuda_url = "https://github.com/ggerganov/llama.cpp/releases/download/{{VERSION}}/llama-{{VERSION}}-bin-win-cuda-cu12.2.0-x64.zip".replace("{{VERSION}}", &latest_tag);
 
     // GitHub さんに迷惑をかけないように直列にダウンロード
-    let llama_zip_path = download_to(latest_llama_url, install_dir.clone()).await;
-    let cuda_zip_path = download_to(latest_cuda_url, install_dir.clone()).await;
+    let llama_zip_download_closure = |c: u64, t:u64| { app.emit("llama_zip_progress", [c, t]).unwrap(); };
+    let llama_zip_path = download_to(latest_llama_url, install_dir.clone(), llama_zip_download_closure).await;
+    let cuda_zip_download_closure = |c: u64, t:u64| { app.emit("cuda_zip_progress", [c, t]).unwrap(); };
+    let cuda_zip_path = download_to(latest_cuda_url, install_dir.clone(), cuda_zip_download_closure).await;
 
     extract_zip(llama_zip_path, install_dir.clone()).await;
     extract_zip(cuda_zip_path, install_dir.clone()).await;
@@ -52,21 +57,23 @@ async fn download_llama_cpp(install_dir: String) -> String {
 }
 
 #[tauri::command]
-async fn download_c3tr_model(install_dir: String, install_model: String) -> String {
+async fn download_c3tr_model(app: AppHandle, install_dir: String, install_model: String) -> String {
     let download_url = "https://huggingface.co/webbigdata/C3TR-Adapter_gguf/resolve/main/{{MODEL_NAME}}?download=true".replace("{{MODEL_NAME}}", &install_model);
 
     // ファイルダウンロード
-    download_to(download_url, install_dir).await
+    let model_download_closure = |c: u64, t:u64| { app.emit("model_progress", [c, t]).unwrap(); };
+    download_to(download_url, install_dir, model_download_closure).await
 }
 
 #[tauri::command]
-async fn download_c3tr_client(install_dir: String) -> String {
+async fn download_c3tr_client(app: AppHandle, install_dir: String) -> String {
     // latest の URL を組み立て
     let latest_tag = get_latest_release_tag(String::from("koron"), String::from("c3tr-client")).await;
     let latest_url = "https://github.com/koron/c3tr-client/releases/download/{{VERSION}}/c3tr-client_{{VERSION}}_windows_amd64.zip".replace("{{VERSION}}", &latest_tag);
 
     // ファイルダウンロード
-    let download_file = download_to(latest_url, install_dir.to_string()).await;
+    let c3tr_zip_download_closure = |c: u64, t:u64| { app.emit("c3tr_zip_progress", [c, t]).unwrap(); };
+    let download_file = download_to(latest_url, install_dir.to_string(), c3tr_zip_download_closure).await;
 
     let install_file = extract_file_from_zip(install_dir, download_file.clone(), String::from("c3tr-client.exe")).await;
 
@@ -106,7 +113,7 @@ async fn extract_file_from_zip(install_dir:String, zip_path: String, target_file
     }
 }
 
-async fn download_to(from: String, to: String) -> String {
+async fn download_to<F: Fn(u64, u64)>(from: String, to: String, progress_func: F) -> String {
     use tokio::io::AsyncWriteExt;
     use tokio::fs::File;
     use futures_util::StreamExt;
@@ -117,6 +124,7 @@ async fn download_to(from: String, to: String) -> String {
     let total_size = response.content_length().unwrap();
 
     let pb = ProgressBar::new(total_size);
+    let mut count: usize = 0;
 
     let file_name = from.split("/").last().unwrap();
     let file_name = file_name.split("?").next().unwrap();
@@ -129,6 +137,8 @@ async fn download_to(from: String, to: String) -> String {
         let chunk = chunk.unwrap();
         out_file.write_all(&chunk).await.unwrap();
         pb.inc(chunk.len() as u64);
+        count += chunk.len();
+        progress_func(count.try_into().unwrap(), total_size);
     }
 
     (*out_file_path.to_string_lossy()).to_string()

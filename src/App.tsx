@@ -6,6 +6,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import "./App.css";
 import { Button, CssBaseline, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 function App() {
 
@@ -44,6 +45,12 @@ function App() {
       if (lLlamaClientArgs) {
         setLlamaClientArgs(lLlamaClientArgs);
       }
+
+      listen("model_progress", (event) => {
+        const current = (event.payload as any)[0];
+        const total = (event.payload as any)[1];
+        console.log(`${current}/${total}`);
+      });
     })()
 
   }, []);
