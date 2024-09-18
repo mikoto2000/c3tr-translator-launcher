@@ -39,5 +39,14 @@ cargo add octocrab
 zip を扱うためにクレートを追加
 
 ```sh
-
+cargo add zip
 ```
+
+プログレスを表示するためのクレートを追加
+
+```sh
+cargo add indicatif
+cargo add tokio --features full
+cargo add futures-util
+```
+

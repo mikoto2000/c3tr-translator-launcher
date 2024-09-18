@@ -8,7 +8,8 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use octocrab::Octocrab;
-use reqwest::get;
+use reqwest::Client;
+use indicatif::ProgressBar;
 use shlex::Shlex;
 use zip::read::ZipArchive;
 
@@ -106,16 +107,34 @@ async fn extract_file_from_zip(install_dir:String, zip_path: String, target_file
 }
 
 async fn download_to(from: String, to: String) -> String {
-    let response = get(&from).await.unwrap();
-    let content = response.bytes().await.unwrap();
+    use tokio::io::AsyncWriteExt;
+    use tokio::fs::File;
+    use tokio::io::AsyncReadExt;
+    use futures_util::StreamExt;
+
+    let client = Client::new();
+    let response = client.get(&from).send().await.unwrap();
+
+    let total_size = response.content_length().unwrap();
+
+    let pb = ProgressBar::new(total_size);
+
     let file_name = from.split("/").last().unwrap();
     let file_name = file_name.split("?").next().unwrap();
     let mut out_file_path = PathBuf::from(&to);
     out_file_path.push(file_name);
-    let mut out_file = File::create(&out_file_path).unwrap();
-    io::copy(&mut content.as_ref(), &mut out_file).unwrap();
+    let mut out_file = File::create(&out_file_path).await.unwrap();
+
+    let mut stream = response.bytes_stream();
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.unwrap();
+        out_file.write_all(&chunk).await.unwrap();
+        pb.inc(chunk.len() as u64);
+    }
+
     (*out_file_path.to_string_lossy()).to_string()
 }
+
 async fn get_latest_release_tag(owner: String, repo: String) -> String {
     // 最新リリースを取得
     let octocrab = Octocrab::builder().build().unwrap();
