@@ -7,6 +7,7 @@ import "./App.css";
 import { Button, CssBaseline, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { ModelDownloader } from "./downloader/ModelDownloader";
 
 function App() {
 
@@ -17,14 +18,10 @@ function App() {
 
   const [llamaServerPath, setLlamaServerPath] = useState<string>("llama-server");
   const [llamaServerArgs, setLlamaServerArgs] = useState<string>(SERVER_ARGS_DEFAULT);
-  const [downloadModelName, setDownloadModelName] = useState<string>("C3TR-Adapter-IQ3_XXS.gguf");
   const [llamaServerModelPath, setLlamaServerModelPath] = useState<string>("");
   const [llamaClientPath, setLlamaClientPath] = useState<string>("c3tr-client");
   const [llamaClientArgs, setLlamaClientArgs] = useState<string>(CLIENT_ARGS_DEFAULT);
 
-  {/* ダウンロードコンポーネントに分離したらそっちに移動 */}
-  const [downloadedSize, setDownloadedSize] = useState<number>(0);
-  const [totalSize, setTotalSize] = useState<number>(0);
 
   useEffect(() => {
 
@@ -54,8 +51,6 @@ function App() {
         const current = (event.payload as any)[0];
         const total = (event.payload as any)[1];
         console.log(`${current}/${total}`);
-        setDownloadedSize(current);
-        setTotalSize(total);
       });
     })()
 
@@ -195,42 +190,9 @@ function App() {
       >
         サーバーファイルダウンロード †選択したディレクトリにファイル一式が展開されます
       </Button>
-      {/* TODO: コンポーネントに分離・ダウンロード中がわかる状態を持たせる */}
-      <FormControl fullWidth>
-        <InputLabel>ダウンロードモデル選択</InputLabel>
-        <Select
-          value={downloadModelName}
-          onChange={(event) => {
-            const newValue = event.target.value;
-            if (newValue) {
-              setDownloadModelName(newValue);
-            }
-          }}
-        >
-          <MenuItem value="C3TR-Adapter-IQ3_XXS.gguf">C3TR-Adapter-IQ3_XXS.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter-Q3_k_m.gguf">C3TR-Adapter-Q3_k_m.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter-Q4_k_m.gguf">C3TR-Adapter-Q4_k_m.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter.f16.Q4_k_m.gguf">C3TR-Adapter.f16.Q4_k_m.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter.f16.Q5_k_m.gguf">C3TR-Adapter.f16.Q5_k_m.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter.f16.Q6_k.gguf">C3TR-Adapter.f16.Q6_k.gguf</MenuItem>
-          <MenuItem value="C3TR-Adapter.f16.Q8_0.gguf">C3TR-Adapter.f16.Q8_0.gguf</MenuItem>
-        </Select>
-      </FormControl>
-      <Button
-        onClick={async () => {
-          const dirPath = await open({ directory: true });
-          if (dirPath) {
-            const installPath: string = await invoke("download_c3tr_model", { installDir: dirPath, installModel: downloadModelName });
-            console.log(installPath);
-            config.set('llamaServerModelPath', installPath);
-            setLlamaServerModelPath(installPath);
-          }
-        }}
-        fullWidth
-      >
-        モデルファイルダウンロード
-      </Button>
-      モデルファイルダウンロード進捗: { `${downloadedSize} / ${totalSize}`}
+      <ModelDownloader
+        setLlamaServerModelPath={setLlamaServerPath}
+      />
       <Button
         onClick={async () => {
           const dirPath = await open({ directory: true });
