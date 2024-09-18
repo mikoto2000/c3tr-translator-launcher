@@ -44,7 +44,7 @@ async fn download_llama_cpp(app: AppHandle, install_dir: String) -> String {
     // GitHub さんに迷惑をかけないように直列にダウンロード
     let llama_zip_download_closure = |c: u64, t:u64| { app.emit("llama_zip_progress", [c, t]).unwrap(); };
     let llama_zip_path = download_to(latest_llama_url, install_dir.clone(), llama_zip_download_closure).await;
-    let cuda_zip_download_closure = |c: u64, t:u64| { app.emit("cuda_zip_progress", [c, t]).unwrap(); };
+    let cuda_zip_download_closure = |c: u64, t:u64| { app.emit("llama_zip_progress", [c, t]).unwrap(); };
     let cuda_zip_path = download_to(latest_cuda_url, install_dir.clone(), cuda_zip_download_closure).await;
 
     extract_zip(llama_zip_path, install_dir.clone()).await;

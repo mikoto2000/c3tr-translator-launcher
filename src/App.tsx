@@ -9,6 +9,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ModelDownloader } from "./downloader/ModelDownloader";
 import { C3trClientDownloader } from "./downloader/C3trClientDownloader";
+import { ServerDownloader } from "./downloader/ServerDownloader";
 
 function App() {
 
@@ -177,20 +178,9 @@ function App() {
         </Button>
       </div>
       <Typography align="left">ダウンローダー:</Typography>
-      <Button
-        onClick={async () => {
-          const dirPath = await open({ directory: true });
-          if (dirPath) {
-            const installPath: string = await invoke("download_llama_cpp", { installDir: dirPath });
-            console.log(installPath);
-            config.set('llamaServerPath', installPath);
-            setLlamaServerPath(installPath);
-          }
-        }}
-        fullWidth
-      >
-        サーバーファイルダウンロード †選択したディレクトリにファイル一式が展開されます
-      </Button>
+      <ServerDownloader
+        setLlamaServerPath={setLlamaServerPath}
+      />
       <ModelDownloader
         setLlamaServerModelPath={setLlamaServerModelPath}
       />
