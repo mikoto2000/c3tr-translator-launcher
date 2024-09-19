@@ -4,7 +4,8 @@ import { Store } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog';
 
 import "./App.css";
-import { Button, CssBaseline, TextField, Typography } from "@mui/material";
+import { Button, CssBaseline, Tab, Tabs, TextField, Typography } from "@mui/material";
+import TabPanel, { a11yProps } from './TabPanel';
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ModelDownloader } from "./downloader/ModelDownloader";
@@ -17,6 +18,8 @@ function App() {
   const CLIENT_ARGS_DEFAULT = "";
 
   const config = new Store("config.dat");
+
+  const [tabIndex, setTabIndex] = useState<number>(0);
 
   const [llamaServerPath, setLlamaServerPath] = useState<string>("llama-server");
   const [llamaServerArgs, setLlamaServerArgs] = useState<string>(SERVER_ARGS_DEFAULT);
@@ -61,132 +64,152 @@ function App() {
   return (
     <div className="container">
       <CssBaseline />
+      <Tabs
+        value={tabIndex}
+        onChange={(_, newValue) => {
+          setTabIndex(newValue);
+        }}
+        variant='fullWidth'
+      >
+        <Tab label="ランチャー" {...a11yProps(0)} />
+        <Tab label="ダウンローダー" {...a11yProps(1)} />
 
-      <Typography align="left">ランチャー:</Typography>
+      </Tabs>
+      <TabPanel
+        value={tabIndex}
+        index={0}
+      >
+        <Typography align="left">ランチャー:</Typography>
 
-      <Typography align="left">Server:</Typography>
-      <div>
-        <TextField
-          label="llama server path"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaServerPath(newValue);
-            config.set('llamaServerPath', newValue);
-          }}
-          value={llamaServerPath}
-          fullWidth
-        />
-        <Button
-          onClick={async () => {
-            const filePath = await open({});
-            if (filePath) {
-              setLlamaServerPath(filePath);
-              config.set('llamaServerPath', filePath);
-            }
-          }}
-          fullWidth
-        >
-          サーバー実行ファイル選択
-        </Button>
-        <TextField
-          label="model"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaServerModelPath(newValue);
-            config.set('llamaServerModelPath', newValue);
-          }}
-          value={llamaServerModelPath}
-          fullWidth
-        />
-        <Button
-          onClick={async () => {
-            const filePath = await open({});
-            if (filePath) {
-              setLlamaServerModelPath(filePath);
-              config.set('llamaServerModelPath', filePath);
-            }
-          }}
-          fullWidth
-        >
-          モデルファイル選択
-        </Button>
-        <TextField
-          label="server argument"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaServerArgs(newValue);
-            config.set('llamaServerArgs', newValue);
-          }}
-          value={llamaServerArgs}
-          fullWidth
-        />
-        <Button
-          onClick={async () => {
-            await invoke(
-              "external_command",
-              {
-                cmd: llamaServerPath,
-                args: "-m " + llamaServerModelPath + " " + llamaServerArgs
-              });
-          }}
-        >
-          実行
-        </Button>
-      </div>
+        <Typography align="left">Server:</Typography>
+        <div>
+          <TextField
+            label="llama server path"
+            onChange={(event) => {
+              const newValue = event.currentTarget.value;
+              setLlamaServerPath(newValue);
+              config.set('llamaServerPath', newValue);
+            }}
+            value={llamaServerPath}
+            fullWidth
+          />
+          <Button
+            onClick={async () => {
+              const filePath = await open({});
+              if (filePath) {
+                setLlamaServerPath(filePath);
+                config.set('llamaServerPath', filePath);
+              }
+            }}
+            fullWidth
+          >
+            サーバー実行ファイル選択
+          </Button>
+          <TextField
+            label="model"
+            onChange={(event) => {
+              const newValue = event.currentTarget.value;
+              setLlamaServerModelPath(newValue);
+              config.set('llamaServerModelPath', newValue);
+            }}
+            value={llamaServerModelPath}
+            fullWidth
+          />
+          <Button
+            onClick={async () => {
+              const filePath = await open({});
+              if (filePath) {
+                setLlamaServerModelPath(filePath);
+                config.set('llamaServerModelPath', filePath);
+              }
+            }}
+            fullWidth
+          >
+            モデルファイル選択
+          </Button>
+          <TextField
+            label="server argument"
+            onChange={(event) => {
+              const newValue = event.currentTarget.value;
+              setLlamaServerArgs(newValue);
+              config.set('llamaServerArgs', newValue);
+            }}
+            value={llamaServerArgs}
+            fullWidth
+          />
+          <Button
+            onClick={async () => {
+              await invoke(
+                "external_command",
+                {
+                  cmd: llamaServerPath,
+                  args: "-m " + llamaServerModelPath + " " + llamaServerArgs
+                });
+            }}
+          >
+            実行
+          </Button>
+        </div>
 
-      <Typography align="left">Client:</Typography>
-      <div>
-        <TextField
-          label="llama client path"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaClientPath(newValue);
-            config.set('llamaClientPath', newValue);
-          }}
-          value={llamaClientPath}
-          fullWidth
+        <Typography align="left">Client:</Typography>
+        <div>
+          <TextField
+            label="llama client path"
+            onChange={(event) => {
+              const newValue = event.currentTarget.value;
+              setLlamaClientPath(newValue);
+              config.set('llamaClientPath', newValue);
+            }}
+            value={llamaClientPath}
+            fullWidth
+          />
+          <Button
+            onClick={async () => {
+              const filePath = await open({});
+              if (filePath) {
+                setLlamaClientPath(filePath);
+                config.set('llamaClientPath', filePath);
+              }
+            }}
+            fullWidth
+          >
+            クライアントファイル選択
+          </Button>
+          <TextField
+            placeholder="client argument"
+            onChange={(event) => {
+              const newValue = event.currentTarget.value;
+              setLlamaClientArgs(newValue);
+            }}
+            value={llamaClientArgs}
+            fullWidth
+          />
+          <Button
+            onClick={async () => {
+              await invoke(
+                "external_command",
+                { cmd: llamaClientPath, args: llamaClientArgs });
+            }}
+          >
+            実行
+          </Button>
+        </div>
+      </TabPanel>
+      <TabPanel
+        value={tabIndex}
+        index={1}
+      >
+        <Typography align="left">ダウンローダー:</Typography>
+        <ServerDownloader
+          setLlamaServerPath={setLlamaServerPath}
         />
-        <Button
-          onClick={async () => {
-            const filePath = await open({});
-            if (filePath) {
-              setLlamaClientPath(filePath);
-              config.set('llamaClientPath', filePath);
-            }
-          }}
-          fullWidth
-        >
-          クライアントファイル選択
-        </Button>
-        <TextField
-          placeholder="client argument"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaClientArgs(newValue);
-          }}
-          value={llamaClientArgs}
-          fullWidth
+        <ModelDownloader
+          setLlamaServerModelPath={setLlamaServerModelPath}
         />
-        <Button
-          onClick={async () => {
-            await invoke(
-              "external_command",
-              { cmd: llamaClientPath, args: llamaClientArgs });
-          }}
-        >
-          実行
-        </Button>
-      </div>
-      <Typography align="left">ダウンローダー:</Typography>
-      <ServerDownloader
-        setLlamaServerPath={setLlamaServerPath}
-      />
-      <ModelDownloader
-        setLlamaServerModelPath={setLlamaServerModelPath}
-      />
-      <C3trClientDownloader
-        setLlamaClientPath={setLlamaClientPath}
-      />
+        <C3trClientDownloader
+          setLlamaClientPath={setLlamaClientPath}
+        />
+      </TabPanel>
     </div>
   );
 }
