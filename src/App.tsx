@@ -4,7 +4,7 @@ import { Store } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog';
 
 import "./App.css";
-import { Button, CssBaseline, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Box, Button, CssBaseline, Stack, Tab, Tabs, TextField, Typography } from "@mui/material";
 import TabPanel, { a11yProps } from './TabPanel';
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -62,7 +62,7 @@ function App() {
   }, []);
 
   return (
-    <div className="container">
+    <div>
       <CssBaseline />
       <Tabs
         value={tabIndex}
@@ -82,51 +82,55 @@ function App() {
         <Typography align="left">ランチャー:</Typography>
 
         <Typography align="left">Server:</Typography>
-        <div>
-          <TextField
-            label="llama server path"
-            onChange={(event) => {
-              const newValue = event.currentTarget.value;
-              setLlamaServerPath(newValue);
-              config.set('llamaServerPath', newValue);
-            }}
-            value={llamaServerPath}
-            fullWidth
-          />
-          <Button
-            onClick={async () => {
-              const filePath = await open({});
-              if (filePath) {
-                setLlamaServerPath(filePath);
-                config.set('llamaServerPath', filePath);
-              }
-            }}
-            fullWidth
-          >
-            サーバー実行ファイル選択
-          </Button>
-          <TextField
-            label="model"
-            onChange={(event) => {
-              const newValue = event.currentTarget.value;
-              setLlamaServerModelPath(newValue);
-              config.set('llamaServerModelPath', newValue);
-            }}
-            value={llamaServerModelPath}
-            fullWidth
-          />
-          <Button
-            onClick={async () => {
-              const filePath = await open({});
-              if (filePath) {
-                setLlamaServerModelPath(filePath);
-                config.set('llamaServerModelPath', filePath);
-              }
-            }}
-            fullWidth
-          >
-            モデルファイル選択
-          </Button>
+        <Stack sx={{ flexDirection: "column" }} spacing={2}>
+          <Box sx={{ display: "flex" }}>
+            <TextField
+              label="llama server path"
+              onChange={(event) => {
+                const newValue = event.currentTarget.value;
+                setLlamaServerPath(newValue);
+                config.set('llamaServerPath', newValue);
+              }}
+              value={llamaServerPath}
+              sx={{ flexGrow: 1 }}
+            />
+            <Button
+              onClick={async () => {
+                const filePath = await open({});
+                if (filePath) {
+                  setLlamaServerPath(filePath);
+                  config.set('llamaServerPath', filePath);
+                }
+              }}
+              sx={{ flexGrow: 0 }}
+            >
+              サーバー実行ファイル選択
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex" }}>
+            <TextField
+              label="model"
+              onChange={(event) => {
+                const newValue = event.currentTarget.value;
+                setLlamaServerModelPath(newValue);
+                config.set('llamaServerModelPath', newValue);
+              }}
+              value={llamaServerModelPath}
+              sx={{ flexGrow: 1 }}
+            />
+            <Button
+              onClick={async () => {
+                const filePath = await open({});
+                if (filePath) {
+                  setLlamaServerModelPath(filePath);
+                  config.set('llamaServerModelPath', filePath);
+                }
+              }}
+              sx={{ flexGrow: 0 }}
+            >
+              モデルファイル選択
+            </Button>
+          </Box>
           <TextField
             label="server argument"
             onChange={(event) => {
@@ -149,10 +153,10 @@ function App() {
           >
             実行
           </Button>
-        </div>
+        </Stack>
 
         <Typography align="left">Client:</Typography>
-        <div>
+        <Stack sx={{ flexDirection: "column" }} spacing={2}>
           <TextField
             label="llama client path"
             onChange={(event) => {
@@ -193,24 +197,26 @@ function App() {
           >
             実行
           </Button>
-        </div>
+        </Stack>
       </TabPanel>
       <TabPanel
         value={tabIndex}
         index={1}
       >
         <Typography align="left">ダウンローダー:</Typography>
-        <ServerDownloader
-          setLlamaServerPath={setLlamaServerPath}
-        />
-        <ModelDownloader
-          setLlamaServerModelPath={setLlamaServerModelPath}
-        />
-        <C3trClientDownloader
-          setLlamaClientPath={setLlamaClientPath}
-        />
+        <Stack sx={{ flexDirection: "column" }} spacing={2}>
+          <ServerDownloader
+            setLlamaServerPath={setLlamaServerPath}
+          />
+          <ModelDownloader
+            setLlamaServerModelPath={setLlamaServerModelPath}
+          />
+          <C3trClientDownloader
+            setLlamaClientPath={setLlamaClientPath}
+          />
+        </Stack>
       </TabPanel>
-    </div>
+    </div >
   );
 }
 
