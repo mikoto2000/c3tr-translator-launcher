@@ -157,28 +157,30 @@ function App() {
 
         <Typography align="left">Client:</Typography>
         <Stack sx={{ flexDirection: "column" }} spacing={2}>
-          <TextField
-            label="llama client path"
-            onChange={(event) => {
-              const newValue = event.currentTarget.value;
-              setLlamaClientPath(newValue);
-              config.set('llamaClientPath', newValue);
-            }}
-            value={llamaClientPath}
-            fullWidth
-          />
-          <Button
-            onClick={async () => {
-              const filePath = await open({});
-              if (filePath) {
-                setLlamaClientPath(filePath);
-                config.set('llamaClientPath', filePath);
-              }
-            }}
-            fullWidth
-          >
-            クライアントファイル選択
-          </Button>
+          <Box sx={{ display: "flex" }}>
+            <TextField
+              label="llama client path"
+              onChange={(event) => {
+                const newValue = event.currentTarget.value;
+                setLlamaClientPath(newValue);
+                config.set('llamaClientPath', newValue);
+              }}
+              value={llamaClientPath}
+              sx={{ flexGrow: 1 }}
+            />
+            <Button
+              onClick={async () => {
+                const filePath = await open({});
+                if (filePath) {
+                  setLlamaClientPath(filePath);
+                  config.set('llamaClientPath', filePath);
+                }
+              }}
+              sx={{ flexGrow: 0 }}
+            >
+              クライアントファイル選択
+            </Button>
+          </Box>
           <TextField
             placeholder="client argument"
             onChange={(event) => {
