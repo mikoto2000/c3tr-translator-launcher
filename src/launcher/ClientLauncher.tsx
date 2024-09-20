@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Store } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog';
 
-import { Box, Button, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import TabPanel, { a11yProps } from './TabPanel';
 import { invoke } from "@tauri-apps/api/core";
 
@@ -12,6 +12,20 @@ type ClientLauncherProps = {
   setLlamaClientPath: (value: string) => void,
 };
 
+type WritingStyle =
+  "casual"
+  | "formal"
+  | "technical"
+  | "journalistic"
+  | "web-fiction"
+  | "business"
+  | "nsfw"
+  | "educational-casual"
+  | "academic-presentation"
+  | "slang"
+  | "sns-casual"
+  ;
+
 export const ClientLauncher: React.FC<ClientLauncherProps> = ({
   llamaClientPath,
   setLlamaClientPath,
@@ -19,8 +33,7 @@ export const ClientLauncher: React.FC<ClientLauncherProps> = ({
 
   const config = new Store("config.dat");
 
-  const CLIENT_ARGS_DEFAULT = "";
-  const [llamaClientArgs, setLlamaClientArgs] = useState<string>(CLIENT_ARGS_DEFAULT);
+  const [writingstyle, setWritingstyle] = useState<WritingStyle>("technical");
 
   useEffect(() => {
 
@@ -28,10 +41,6 @@ export const ClientLauncher: React.FC<ClientLauncherProps> = ({
       const lLlamaClientPath = await config.get<string>('llamaClientPath');
       if (lLlamaClientPath) {
         setLlamaClientPath(lLlamaClientPath);
-      }
-      const lLlamaClientArgs = await config.get<string>('llamaClientArgs');
-      if (lLlamaClientArgs) {
-        setLlamaClientArgs(lLlamaClientArgs);
       }
     })()
 
@@ -66,20 +75,35 @@ export const ClientLauncher: React.FC<ClientLauncherProps> = ({
             クライアントファイル選択
           </Button>
         </Box>
-        <TextField
-          placeholder="client argument"
-          onChange={(event) => {
-            const newValue = event.currentTarget.value;
-            setLlamaClientArgs(newValue);
-          }}
-          value={llamaClientArgs}
-          fullWidth
-        />
+        <FormControl fullWidth>
+          <InputLabel>ダウンロードモデル選択</InputLabel>
+          <Select
+            value={writingstyle}
+            onChange={(event) => {
+              const newValue = event.target.value;
+              if (newValue) {
+                setWritingstyle(newValue as WritingStyle);
+              }
+            }}
+          >
+            <MenuItem value="casual">casual</MenuItem>
+            <MenuItem value="formal">formal</MenuItem>
+            <MenuItem value="technical">technical</MenuItem>
+            <MenuItem value="journalistic">journalistic</MenuItem>
+            <MenuItem value="web-fiction">web-fiction</MenuItem>
+            <MenuItem value="business">business</MenuItem>
+            <MenuItem value="nsfw">nsfw</MenuItem>
+            <MenuItem value="educational-casual">educational-casual</MenuItem>
+            <MenuItem value="academic-presentation">academic-presentation</MenuItem>
+            <MenuItem value="slang">slang</MenuItem>
+            <MenuItem value="sns-casual">sns-casual</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           onClick={async () => {
             await invoke(
               "external_command",
-              { cmd: llamaClientPath, args: llamaClientArgs });
+              { cmd: llamaClientPath, args: `-writingstyle ${writingstyle} ` });
           }}
         >
           実行
