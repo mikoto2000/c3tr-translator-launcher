@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Store } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog';
 
-import "./App.css";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 
