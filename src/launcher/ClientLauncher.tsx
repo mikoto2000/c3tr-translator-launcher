@@ -76,7 +76,7 @@ export const ClientLauncher: React.FC<ClientLauncherProps> = ({
           </Button>
         </Box>
         <FormControl fullWidth>
-          <InputLabel>ダウンロードモデル選択</InputLabel>
+          <InputLabel>翻訳スタイル選択</InputLabel>
           <Select
             value={writingstyle}
             onChange={(event) => {
